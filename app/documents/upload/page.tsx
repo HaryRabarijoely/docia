@@ -7,6 +7,7 @@ const MAX_FILE_SIZE = 20 * 1024 * 1024;
 export default function DocumentUploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -38,6 +39,15 @@ export default function DocumentUploadPage() {
     return `${(size / 1024 / 1024).toFixed(2)} Mo`;
   }
 
+  function handleAnalysis() {
+    if (!file || isAnalyzing) {
+      return;
+    }
+
+    setError(null);
+    setIsAnalyzing(true);
+  }
+
   return (
     <div className="mx-auto max-w-4xl space-y-8">
       {/* HEADER */}
@@ -55,37 +65,44 @@ export default function DocumentUploadPage() {
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 px-6 py-16 text-center transition hover:border-blue-400 hover:bg-blue-50/30">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-3xl">
-            📄
+            {isAnalyzing ? "🧠" : "📄"}
           </div>
 
           <h2 className="mt-6 text-lg font-semibold text-slate-900">
-            Déposez votre document ici
+            {isAnalyzing
+              ? "Analyse en cours..."
+              : "Déposez votre document ici"}
           </h2>
 
           <p className="mt-2 max-w-md text-sm text-slate-500">
-            Glissez-déposez votre fichier PDF dans cette zone ou sélectionnez
-            un fichier depuis votre ordinateur.
+            {isAnalyzing
+              ? "DocIA prépare votre document pour l'analyse."
+              : "Glissez-déposez votre fichier PDF dans cette zone ou sélectionnez un fichier depuis votre ordinateur."}
           </p>
 
-          <input
-            ref={inputRef}
-            type="file"
-            accept="application/pdf"
-            onChange={handleFileChange}
-            className="hidden"
-          />
+          {!isAnalyzing && (
+            <>
+              <input
+                ref={inputRef}
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className="hidden"
+              />
 
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="mt-6 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
-          >
-            Sélectionner un fichier
-          </button>
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="mt-6 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Sélectionner un fichier
+              </button>
 
-          <p className="mt-4 text-xs text-slate-400">
-            PDF uniquement · Taille maximale : 20 Mo
-          </p>
+              <p className="mt-4 text-xs text-slate-400">
+                PDF uniquement · Taille maximale : 20 Mo
+              </p>
+            </>
+          )}
 
           {/* ERROR */}
           {error && (
@@ -116,10 +133,11 @@ export default function DocumentUploadPage() {
         <div className="mt-6 flex justify-end">
           <button
             type="button"
-            disabled={!file}
+            onClick={handleAnalysis}
+            disabled={!file || isAnalyzing}
             className="rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            Lancer l'analyse
+            {isAnalyzing ? "Analyse en cours..." : "Lancer l'analyse"}
           </button>
         </div>
       </div>
