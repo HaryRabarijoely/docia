@@ -39,13 +39,41 @@ export default function DocumentUploadPage() {
     return `${(size / 1024 / 1024).toFixed(2)} Mo`;
   }
 
-  function handleAnalysis() {
+  async function handleAnalysis() {
     if (!file || isAnalyzing) {
       return;
     }
 
     setError(null);
     setIsAnalyzing(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("/api/documents/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Une erreur est survenue lors de l'envoi du document.",
+        );
+      }
+
+      console.log("Document reçu par l'API :", data);
+    } catch (error) {
+      setIsAnalyzing(false);
+
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue lors de l'envoi du document.",
+      );
+    }
   }
 
   return (
