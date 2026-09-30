@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum DocumentStatus {
+  UPLOADED
+  PROCESSING
+  ANALYZED
+  REVIEW_REQUIRED
+  NEEDS_INFORMATION
+  VALIDATED
+  FAILED
+}
+
+model Document {
+  id        String         @id @default(cuid())
+  fileName  String
+  filePath  String
+  fileSize  Int
+  mimeType  String
+  status    DocumentStatus @default(UPLOADED)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
