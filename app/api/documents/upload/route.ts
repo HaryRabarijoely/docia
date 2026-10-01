@@ -1,3 +1,7 @@
+import { randomUUID } from "crypto";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
@@ -26,15 +30,30 @@ export async function POST(request: Request) {
       );
     }
 
+    const storageDirectory = path.join(
+      process.cwd(),
+      "storage",
+      "documents",
+    );
+
+    await mkdir(storageDirectory, { recursive: true });
+
+    const fileId = randomUUID();
+    const filePath = path.join(storageDirectory, `${fileId}.pdf`);
+
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+    await writeFile(filePath, fileBuffer);
+
     return Response.json({
       success: true,
       fileName: file.name,
       fileSize: file.size,
-      message: "Document reçu avec succès.",
+      message: "Document enregistré avec succès.",
     });
   } catch {
     return Response.json(
-      { error: "Une erreur est survenue lors de la réception du document." },
+      { error: "Une erreur est survenue lors de l'enregistrement du document." },
       { status: 500 },
     );
   }
